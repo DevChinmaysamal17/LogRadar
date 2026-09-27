@@ -4,6 +4,7 @@ package rules
 
 import (
 	"LogRadar/internal/parser"
+	"sync"
 	"time"
 )
 
@@ -11,6 +12,7 @@ type BruteForceDetector struct {
 	Threshold int
 	Window    time.Duration
 	Attempts  map[string][]parser.LogEvent
+	mu        sync.Mutex
 }
 
 func NewBruteForceDetector(threshold int, window time.Duration) *BruteForceDetector {
@@ -22,6 +24,8 @@ func NewBruteForceDetector(threshold int, window time.Duration) *BruteForceDetec
 }
 
 func (d *BruteForceDetector) Check(event parser.LogEvent) *Alert {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 	// 	New login event
 	//       |
 	// Is it login_failed?
