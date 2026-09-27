@@ -1,0 +1,30 @@
+What are we making?
+
+TripWire - a Go-based CLI service that tails application log files, 
+detects suspicious activity (brute-force logins, request rate spikes) 
+using configurable rules, and exposes the results as Prometheus metrics for Grafana dashboards.
+
+
+What is the purpose?
+
+Purpose is depth of understanding: real practice with Go concurrency (goroutines/channels), 
+log parsing, and how security monitoring tools actually work under the hood, 
+as a portfolio/learning project, not a production tool for real customers.
+
+
+How we are gonna go it and what modules are we gonna use?
+
+Build order:
+
+Phase - 1 Log ingestion — Tail the log file continuously using a goroutine + channel.
+Phase - 2 Event parsing — Convert raw JSON lines into a LogEvent struct.
+Phase - 3 Rule engine — Detect suspicious patterns using configurable rules.
+Phase - 4 Alerting — Generate alerts when a rule is triggered.
+Phase - 5 Metrics/monitoring — Expose metrics for Prometheus/Grafana.
+Phase - 6 Configuration — Move rules/settings out of hardcoded Go code.
+Phase - 7 Testing — Unit tests + tests for detection rules.
+Phase - 8 Docker/deployment — Containerize and run LogRadar as a real service.           
+
+
+Questions related to Tripwire:
+
