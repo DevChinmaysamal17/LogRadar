@@ -1,6 +1,6 @@
 What are we making?
 
-TripWire - a Go-based CLI service that tails application log files, 
+LogRadar - a Go-based CLI service that tails application log files, 
 detects suspicious activity (brute-force logins, request rate spikes) 
 using configurable rules, and exposes the results as Prometheus metrics for Grafana dashboards.
 
