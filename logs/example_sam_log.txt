@@ -1,0 +1,16 @@
+# example_sam_log.log
+# Sample log entries for testing different login events in LogRadar.
+
+# Failed login attempt from admin user.
+echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.168.1.10","event_type":"login_failed","username":"admin","status":"failed"}' >> logs/sample.log
+
+# Failed login attempt from a different user and IP.
+echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.172.1.11","event_type":"login_failed","username":"user","status":"failed"}' >> logs/sample.log
+
+# Successful login attempt from the user.
+# This should NOT trigger the brute-force rule because the event is login_passed.
+echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.172.1.11","event_type":"login_passed","username":"user","status":"passed"}' >> logs/sample.log
+
+# Successful login attempt from the admin user.
+# This should NOT count as a failed login attempt.
+echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.172.1.10","event_type":"login_passed","username":"admin","status":"passed"}' >> logs/sample.log

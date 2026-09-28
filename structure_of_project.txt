@@ -16,13 +16,13 @@ How we are gonna go it and what modules are we gonna use?
 
 Build order:
 
-Phase - 1 Log ingestion — Tail the log file continuously using a goroutine + channel.
-Phase - 2 Event parsing — Convert raw JSON lines into a LogEvent struct.
-Phase - 3 Rule engine — Detect suspicious patterns using configurable rules.
-Phase - 4 Alerting — Generate alerts when a rule is triggered.
-Phase - 5 Metrics/monitoring — Expose metrics for Prometheus/Grafana.
-Phase - 6 Configuration — Move rules/settings out of hardcoded Go code.
-Phase - 7 Testing — Unit tests + tests for detection rules.
-Phase - 8 Docker/deployment — Containerize and run LogRadar as a real service.           
+Phase - 1: Log ingestion — Tail the log file continuously using a goroutine + channel.
+Phase - 2: Event parsing — Convert raw JSON lines into a LogEvent struct.
+Phase - 3: Rule engine — Detect suspicious patterns using configurable rules.
+Phase - 4: Alerting — Generate alerts when a rule is triggered.
+Phase - 5: Metrics/monitoring — Expose metrics for Prometheus/Grafana.
+Phase - 6: Configuration — Move rules/settings out of hardcoded Go code.
+Phase - 7: Testing — Unit tests + tests for detection rules.
+Phase - 8: Docker/deployment — Containerize and run LogRadar as a real service.           
 
 

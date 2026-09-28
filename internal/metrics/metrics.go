@@ -11,8 +11,6 @@ import (
 )
 
 var (
-
-	//
 	EventsProcessed = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "logradar_events_processed_total", //Incremented in main.go after every log entry
@@ -27,6 +25,8 @@ var (
 	)
 )
 
+// Func to tell prometheus on which prot it has to worker
+// Called at the start of main.go
 func Serve(port string) {
 
 	http.Handle("/metrics", promhttp.Handler())

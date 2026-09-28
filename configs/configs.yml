@@ -1,0 +1,8 @@
+# Phase - 6: Configuration — Move rules/settings out of hardcoded Go code.
+
+
+# detector := rules.NewBruteForceDetector(5, 30*time.Second)
+# func NewBruteForceDetector(threshold int, window time.Duration) *BruteForceDetector {
+brute_force:
+  threshold: 5
+  window: 30s
