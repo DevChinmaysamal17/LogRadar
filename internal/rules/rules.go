@@ -13,3 +13,7 @@ type Alert struct {
 	MatchedEvents     []parser.LogEvent
 	Severity          string
 }
+
+type Rule interface {
+	Check(event parser.LogEvent) *Alert
+}

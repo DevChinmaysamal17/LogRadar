@@ -1,6 +1,7 @@
 package main
 
 import (
+	"LogRadar/internal/alerting"
 	"LogRadar/internal/parser"
 	"LogRadar/internal/rules"
 	"LogRadar/internal/tailer"
@@ -16,24 +17,31 @@ func main() {
 
 	go tailer.Tail("logs/sample.log", lines, stop)
 
+	// Channels for Phase 4
+
+	events := make(chan parser.LogEvent)
+	alerts := make(chan rules.Alert)
+
 	detector := rules.NewBruteForceDetector(5, 30*time.Second)
 
-	// Phase 2: Event parsing
+	go alerting.Printer(alerts)
+
+	go rules.Worker(detector, events, alerts)
+
+	// Phase 2 and 3: Event parsing and Rule engine
 	for line := range lines {
 
-		fmt.Printf("Raw log: %s", line)
+		fmt.Printf("\nRaw log: %s", line)
 
 		event, err := parser.Parse(line)
 		if err != nil {
-			fmt.Println("Parse error: ", err)
+			fmt.Println("\nParse error: \n", err)
+			continue
 		}
 
-		fmt.Printf("Parsed event: %+v\n", event)
+		fmt.Printf("\nParsed event: \n%+v\n", event)
 
-		alert := detector.Check(event)
-		if alert != nil {
-			fmt.Printf("Alert: %s| IP: %s | Severity: %s\n", alert.RuleName, event.SourceIP, alert.Severity)
-		}
+		events <- event
 
 	}
 }
