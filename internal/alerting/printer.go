@@ -16,6 +16,6 @@ func Printer(alerts <-chan rules.Alert) {
 		fmt.Println("Matched Events:", len(receive_alert.MatchedEvents))
 		fmt.Println("Source IP:", receive_alert.MatchedEvents[0].SourceIP)
 		fmt.Println("Username:", receive_alert.MatchedEvents[0].Username)
-		fmt.Println("Username:", receive_alert.MatchedEvents[0].EventType)
+		fmt.Println("Event:", receive_alert.MatchedEvents[0].EventType)
 	}
 }
