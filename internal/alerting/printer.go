@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// receives signal from alerts(workers.go) and print alert
+// receives signal from alerts(workers.go) and print alert in a structure form
 
 func Printer(alerts <-chan rules.Alert) {
 	for receive_alert := range alerts {

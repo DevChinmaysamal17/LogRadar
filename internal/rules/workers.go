@@ -1,6 +1,9 @@
 package rules
 
-import "LogRadar/internal/parser"
+import (
+	"LogRadar/internal/metrics"
+	"LogRadar/internal/parser"
+)
 
 // a worker func receives new events and check using Check() func,
 // if any alerts, then sends the alert to channel "alerts"
@@ -9,6 +12,7 @@ func Worker(rule Rule, events <-chan parser.LogEvent, alerts chan<- Alert) {
 		alert := rule.Check(event)
 
 		if alert != nil {
+			metrics.AlertsTriggered.Inc() //Phase 5: Incrementing number of alerts triggered
 			alerts <- *alert
 		}
 	}

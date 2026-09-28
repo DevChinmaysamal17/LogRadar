@@ -5,8 +5,7 @@ import (
 	"time"
 )
 
-// making a alert struct
-
+// Alert represents a detected security threat.
 type Alert struct {
 	RuleName          string
 	Triggered_at_time time.Time
@@ -14,6 +13,7 @@ type Alert struct {
 	Severity          string
 }
 
+// Rule defines the common behavior every detection rule must follow.
 type Rule interface {
 	Check(event parser.LogEvent) *Alert
 }

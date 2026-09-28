@@ -26,5 +26,3 @@ Phase - 7 Testing — Unit tests + tests for detection rules.
 Phase - 8 Docker/deployment — Containerize and run LogRadar as a real service.           
 
 
-Questions related to Tripwire:
-

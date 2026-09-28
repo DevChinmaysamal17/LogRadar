@@ -2,6 +2,7 @@ package main
 
 import (
 	"LogRadar/internal/alerting"
+	"LogRadar/internal/metrics"
 	"LogRadar/internal/parser"
 	"LogRadar/internal/rules"
 	"LogRadar/internal/tailer"
@@ -11,14 +12,16 @@ import (
 
 func main() {
 
+	// Phase 5: Start metrics server on port 9000
+	go metrics.Serve("9000")
+
 	// Phase 1: Log ingestion
 	lines := make(chan string)
 	stop := make(chan struct{})
 
 	go tailer.Tail("logs/sample.log", lines, stop)
 
-	// Channels for Phase 4
-
+	// Channels for Phase 4, making channels for parser and rules
 	events := make(chan parser.LogEvent)
 	alerts := make(chan rules.Alert)
 
@@ -38,6 +41,9 @@ func main() {
 			fmt.Println("\nParse error: \n", err)
 			continue
 		}
+
+		// Phase 5: Incrementing error count in prometheus
+		metrics.EventsProcessed.Inc()
 
 		fmt.Printf("\nParsed event: \n%+v\n", event)
 

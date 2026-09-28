@@ -15,8 +15,8 @@ This is a learning-depth project, not a novel product. Log-based security monito
 - [x] Phase 1 — Log ingestion (file tailer)
 - [x] Phase 2 — Event parsing (JSON log lines → structured events)
 - [x] Phase 3 — Brute-force login detection rule
-- [ ] Phase 4 — Worker pool (concurrent rule evaluation) — in progress
-- [ ] Phase 5 — Prometheus `/metrics` endpoint
+- [x] Phase 4 — Worker pool (concurrent rule evaluation) — in progress
+- [x] Phase 5 — Prometheus `/metrics` endpoint
 - [ ] Phase 6 — Config file support (rules become configurable)
 - [ ] Phase 7 — Dockerize + CI/CD via GitHub Actions
 

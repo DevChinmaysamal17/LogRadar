@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// LogEvent represents one parsed log entry.
 type LogEvent struct {
 	Timestamp time.Time `json:"timestamp"`
 	SourceIP  string    `json:"source_ip"`
@@ -16,6 +17,7 @@ type LogEvent struct {
 	Status    string    `json:"status"`
 }
 
+// Parse converts a JSON log line into a LogEvent.
 func Parse(line string) (LogEvent, error) {
 	var event LogEvent
 	err := json.Unmarshal([]byte(line), &event)

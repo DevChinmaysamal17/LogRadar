@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// BruteForceDetector tracks failed login attempts for each IP.
 type BruteForceDetector struct {
 	Threshold int
 	Window    time.Duration
@@ -15,6 +16,7 @@ type BruteForceDetector struct {
 	mu        sync.Mutex
 }
 
+// NewBruteForceDetector creates a brute force detector with a threshold and time window.
 func NewBruteForceDetector(threshold int, window time.Duration) *BruteForceDetector {
 	return &BruteForceDetector{
 		Attempts:  make(map[string][]parser.LogEvent),
@@ -23,6 +25,7 @@ func NewBruteForceDetector(threshold int, window time.Duration) *BruteForceDetec
 	}
 }
 
+// Check() checks whether an event contributes to a brute force attack.
 func (d *BruteForceDetector) Check(event parser.LogEvent) *Alert {
 	d.mu.Lock()
 	defer d.mu.Unlock()
