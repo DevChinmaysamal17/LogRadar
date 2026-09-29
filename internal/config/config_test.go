@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// go test scans every file ending in _test.go/
+// and the function which we have test must start with Test
+
 func TestLoad(t *testing.T) {
 
 	// Temporary YAML content for testing.
