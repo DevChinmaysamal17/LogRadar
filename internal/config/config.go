@@ -18,6 +18,8 @@ type BruteForceConfig struct {
 
 // reads a path like "configs/configs.yml" if any error found then sends it to Config{}
 // return that config and error
+// Load(path)
+// Read YAML file -> (Unmarshal YAML-> Config struct) -> ((Success -> config, nil) or (Error -> Config{}, error))
 func Load(path string) (Config, error) {
 
 	data, err := os.ReadFile(path)
