@@ -181,38 +181,26 @@ LogRadar Container
 
 ## Architecture
 
-                         main.go
-                    Application Entry Point
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-          ▼                ▼                ▼
-   Config Loader       Log Tailer       Metrics Server
-          │                │                │
-          ▼                ▼                │
-     Rule Config      Lines Channel          │
-                           │                 │
-                           ▼                 │
-                        Parser               │
-                           │                 │
-                           ▼                 │
-                     Events Channel          │
-                           │                 │
-                           ▼                 │
-                      Rule Worker            │
-                           │                 │
-                           ▼                 │
-                     Alert Channel           │
-                           │                 │
-                           ▼                 │
-                    Alert Printer            │
-                                             │
-                                             ▼
-                                      /metrics :9000
-                                             │
-                                             ▼
-                                      Prometheus :9090
+```mermaid
+flowchart TD
+    Main["main.go<br/>Application Entry Point"]
+    
+    Main --> ConfigLoader["Config Loader"]
+    Main --> LogTailer["Log Tailer"]
+    Main --> MetricsServer["Metrics Server"]
 
+    ConfigLoader --> RuleConfig["Rule Config"]
+
+    LogTailer --> LinesChannel["Lines Channel"]
+    LinesChannel --> Parser["Parser"]
+    Parser --> EventsChannel["Events Channel"]
+    EventsChannel --> RuleWorker["Rule Worker"]
+    RuleWorker --> AlertChannel["Alert Channel"]
+    AlertChannel --> AlertPrinter["Alert Printer"]
+
+    MetricsServer --> MetricsEndpoint["/metrics :9000"]
+    MetricsEndpoint --> Prometheus["Prometheus :9090"]
+```
 
 ---
 
