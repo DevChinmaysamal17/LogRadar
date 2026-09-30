@@ -1,0 +1,31 @@
+# First, Docker Compose reads the docker-compose.yml file. When it reaches build: .
+# it uses the Dockerfile in the current directory to build the LogRadar image according to all its instructions.
+# Once the image is built, Compose continues setting up the remaining services, volumes, ports, and containers.
+services:
+
+  logradar:
+
+    # Build the image using the Dockerfile in the current directory.
+    build: .
+    container_name: logradar
+    ports:
+    # /metrics
+      - 9000:9000
+
+    # Mount logs and configuration from the host, these are the files which required at runtime
+    volumes:
+      - ./logs:/app/logs
+      - ./configs:/app/configs
+
+
+  prometheus:
+    # Using the official Prometheus image
+    image: prom/prometheus
+    # Name the container
+    container_name: prometheus
+    # Map host port 9090 to container port 9090.
+    ports:
+      - "9090:9090"
+    # Gives Prometheus the configuration file.
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml

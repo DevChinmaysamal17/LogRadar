@@ -1,111 +1,88 @@
 # LogRadar
 
-A Go-based security monitoring service that continuously tails application logs, parses events, detects suspicious activity using configurable rules, and exposes metrics for Prometheus.
+A Go-based security monitoring service that continuously tails application logs, parses events, detects suspicious activity using configurable rules, and exposes monitoring metrics through Prometheus.
+
+---
 
 ## Purpose
 
-LogRadar is a **learning-depth portfolio project**, not a novel security product.
-
-The goal is to build hands-on understanding of:
-
-- Go concurrency — goroutines, channels, worker patterns
-- Continuous log ingestion and parsing
-- Rule-based security detection
-- Configuration-driven applications
-- Observability with Prometheus
-- Testing and containerized deployment
+LogRadar is a **learning-depth portfolio project** designed to build practical understanding of backend systems, concurrent event processing, security monitoring, configuration-driven applications, observability, and containerization.
 
 ---
 
-## Status
+## Detailed Information
 
-🚧 **In Progress**
+### Phase 1 - Log Ingestion
 
-### Phase 1 — Log Ingestion ✅
-Continuously tails the log file and sends newly added lines through a Go channel.
+LogRadar continuously monitors an application log file for newly appended entries.
 
-### Phase 2 — Event Parsing ✅
-Converts raw JSON log lines into structured `LogEvent` objects.
+A dedicated Go goroutine runs the log tailing process and reads new lines as they are added to the file. Each raw log line is sent through a Go channel for further processing.
 
-### Phase 3 — Rule Engine ✅
-Processes parsed events through detection rules. Currently includes configurable brute-force detection.
-
-### Phase 4 — Alerting ✅
-Generates alerts when a rule is triggered and sends them through an alert channel to the terminal printer.
-
-### Phase 5 — Prometheus Metrics ✅
-Tracks processed events and triggered alerts and exposes them through a `/metrics` HTTP endpoint.
-
-### Phase 6 — Configuration ✅
-Moves detection settings such as threshold and time window into `configs/configs.yml`, so rules can be changed without modifying Go code.
-
-### Phase 7 — Testing ⬜
-Add unit tests for the parser, configuration loader, rules, and other core components.
-
-### Phase 8 — Docker & Deployment ⬜
-Containerize LogRadar and prepare it for deployment with a production-style runtime setup.
+**Key concepts:**
+- File handling with Go
+- Continuous log monitoring
+- `bufio.Scanner`
+- Goroutines
+- Go channels
 
 ---
 
-## Architecture
+### Phase 2 — Event Parsing
+
+Raw log lines are received as JSON strings and converted into structured `LogEvent` objects.
+
+Each event contains information such as:
 
 ```text
-                    configs/configs.yml
-                            │
-                            ▼
-                     Config Loader
-                            │
-                            ▼
-                      Rule Config
-                            │
-                            ▼
-┌─────────────┐      ┌──────────────┐      ┌──────────────┐
-│  Log File   │ ───► │    Tailer    │ ───► │ lines channel│
-└─────────────┘      │  Goroutine   │      └──────┬───────┘
-                     └──────────────┘             │
-                                                 ▼
-                                          ┌──────────────┐
-                                          │    Parser    │
-                                          └──────┬───────┘
-                                                 │
-                                                 ▼
-                                          events channel
-                                                 │
-                                                 ▼
-                                      ┌───────────────────┐
-                                      │    Rule Worker    │
-                                      │ Brute Force Rule  │
-                                      └─────────┬─────────┘
-                                                │
-                                                ▼
-                                         alerts channel
-                                                │
-                                                ▼
-                                      ┌───────────────────┐
-                                      │   Alert Printer   │
-                                      └───────────────────┘
-
-
-                  ┌──────────────────────────┐
-                  │     Prometheus Metrics  │
-                  │ Events + Alerts counters│
-                  └────────────┬─────────────┘
-                               │
-                               ▼
-                         /metrics :9000
+Timestamp
+Source IP
+Event Type
+Username
+Status
 ```
 
-### Core data flow
+The parser validates and converts incoming JSON into a format that can be processed by the rule engine.
+
+**Flow:**
 
 ```text
-Log File
-   ↓
-Tailer
-   ↓
-Raw log channel
-   ↓
+Raw JSON Log
+     ↓
 JSON Parser
-   ↓
+     ↓
+LogEvent
+```
+
+---
+
+### Phase 3 — Rule Engine
+
+Parsed events are passed to the rule-processing system.
+
+LogRadar currently implements a configurable **brute-force detection rule** that tracks failed login attempts from the same source and evaluates them against a configured threshold and time window.
+
+For example:
+
+```yaml
+threshold: 5
+window: 30s
+```
+
+means that five failed login attempts within 30 seconds can trigger a detection.
+
+The rule system is separated from the parser so detection logic can be extended independently.
+
+---
+
+### Phase 4 — Alerting
+
+When a detection rule is triggered, LogRadar creates an alert containing information about the detected activity.
+
+Alerts are passed through an alert channel and handled by the alert printer.
+
+**Flow:**
+
+```text
 LogEvent
    ↓
 Rule Worker
@@ -114,103 +91,31 @@ Detection Rule
    ↓
 Alert
    ↓
+Alert Channel
+   ↓
 Alert Printer
 ```
 
----
-
-## Tech Stack
-
-- **Go** — Core language; goroutines, channels, structs, interfaces, error handling and concurrency
-- **`bufio` + `os`** — Continuously read and tail the application log file
-- **`encoding/json`** — Convert JSON log lines into structured events
-- **Go Channels** — Move logs, events and alerts between concurrent components
-- **`time`** — Handle configurable detection time windows
-- **YAML (`gopkg.in/yaml.v3`)** — Load external application/rule configuration
-- **Prometheus `client_golang`** — Instrument LogRadar and expose application metrics
-- **Prometheus** *(currently used)* — Scrape and store LogRadar metrics
-- **Grafana** *(future)* — Visualize Prometheus metrics through dashboards
-- **Docker** *(future)* — Containerize LogRadar
-- **GitHub Actions** *(future)* — Automate testing and CI/CD
+This keeps detection processing separate from alert output.
 
 ---
 
-## Project Structure
+### Phase 5 — Prometheus Metrics
+
+LogRadar exposes application metrics through an HTTP `/metrics` endpoint.
+
+The metrics endpoint runs on:
 
 ```text
-LogRadar/
-├── cmd/
-│   └── logradar/
-│       └── main.go              # Application entry point
-│
-├── internal/
-│   ├── alerting/
-│   │   └── printer.go           # Prints triggered alerts
-│   │
-│   ├── config/
-│   │   └── config.go            # Loads YAML configuration
-│   │
-│   ├── metrics/
-│   │   └── metrics.go           # Prometheus counters + /metrics
-│   │
-│   ├── parser/
-│   │   └── parser.go            # JSON log -> LogEvent
-│   │
-│   ├── rules/
-│   │   ├── brute_force.go       # Brute-force detection
-│   │   ├── rules.go             # Rule and Alert definitions
-│   │   └── workers.go           # Concurrent rule worker
-│   │
-│   └── tailer/
-│       └── tailer.go            # Continuous log tailing
-│
-├── configs/
-│   └── configs.yml              # External rule configuration
-│
-├── logs/
-│   └── sample.log               # Sample application logs
-│
-├── tests/                       # Test files/data
-├── prometheus.yml               # Prometheus scrape configuration
-├── go.mod
-├── go.sum
-└── README.md
+localhost:9000/metrics
 ```
 
----
+Prometheus runs separately and uses its configuration to scrape this endpoint.
 
-## Configuration
-
-Detection settings are stored outside the Go source code:
-
-```yaml
-brute_force:
-  threshold: 5
-  window: 30s
-```
-
-This means LogRadar triggers a brute-force alert when the configured threshold of failed login attempts occurs within the configured time window.
-
-Changing:
-
-```yaml
-threshold: 5
-```
-
-to:
-
-```yaml
-threshold: 10
-```
-
-does not require changing the Go detection code.
-
-## Prometheus Metrics
-
-LogRadar exposes metrics at:
+Prometheus itself runs on:
 
 ```text
-http://localhost:9000/metrics
+localhost:9090
 ```
 
 Currently tracked metrics include:
@@ -220,81 +125,365 @@ logradar_events_processed_total
 logradar_alerts_triggered_total
 ```
 
-These can be scraped by Prometheus for monitoring and analysis.
+This provides visibility into the number of processed events and triggered detections.
 
-Grafana dashboards are planned for a future phase.
+---
 
-## Running Locally
+### Phase 6 — Configuration
 
-Clone the repository:
+Detection settings are externalized into a YAML configuration file instead of being hardcoded into the detection logic.
 
-```bash
-git clone https://github.com/DevChinmaysamal17/LogRadar.git
-cd LogRadar
+Example:
+
+```yaml
+brute_force:
+  threshold: 5
+  window: 30s
 ```
 
-Run the application:
+The configuration loader reads these values when LogRadar starts.
 
-```bash
-go run ./cmd/logradar
+This allows detection behavior to be modified without changing the Go source code.
+
+---
+
+### Phase 7 — Testing
+
+The project includes tests for important application components such as parsing, configuration loading, and detection rules.
+
+Testing focuses on verifying that individual components behave correctly and that detection logic produces the expected results for different event patterns.
+
+---
+
+### Phase 8 — Docker
+
+LogRadar is containerized using Docker.
+
+The application can run inside a container while exposing its metrics endpoint on port `9000`.
+
+Prometheus can then scrape the containerized LogRadar service through the configured Docker networking setup.
+
+The resulting monitoring flow is:
+
+```text
+LogRadar Container
+       │
+       │ :9000
+       ▼
+   Prometheus
+       │
+       │ :9090
+       ▼
+ Prometheus UI
 ```
 
-In another terminal, append a new log:
+---
 
-```bash
-echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.168.1.10","event_type":"login_failed","username":"admin","status":"failed"}' >> logs/sample.log
+## Architecture
+
+                         main.go
+                    Application Entry Point
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+   Config Loader       Log Tailer       Metrics Server
+          │                │                │
+          ▼                ▼                │
+     Rule Config      Lines Channel          │
+                           │                 │
+                           ▼                 │
+                        Parser               │
+                           │                 │
+                           ▼                 │
+                     Events Channel          │
+                           │                 │
+                           ▼                 │
+                      Rule Worker            │
+                           │                 │
+                           ▼                 │
+                     Alert Channel           │
+                           │                 │
+                           ▼                 │
+                    Alert Printer            │
+                                             │
+                                             ▼
+                                      /metrics :9000
+                                             │
+                                             ▼
+                                      Prometheus :9090
+
+
+---
+
+## Core Data Flow
+
+```text
+Application Log
+       ↓
+Log Tailer
+       ↓
+Raw Log Channel
+       ↓
+JSON Parser
+       ↓
+LogEvent
+       ↓
+Events Channel
+       ↓
+Rule Worker
+       ↓
+Detection Rule
+       ↓
+Alert
+       ↓
+Alert Channel
+       ↓
+Alert Printer
 ```
 
-Multiple failed login events from the same IP within the configured window can trigger the brute-force detection rule.
+At the same time, LogRadar records application metrics:
 
-## Scope
+```text
+Events / Alerts
+       ↓
+Prometheus Metrics
+       ↓
+/metrics :9000
+       ↓
+Prometheus :9090
+```
 
-### Current
+---
 
-- Single log-file input
-- JSON log parsing
-- Configurable brute-force detection
-- Concurrent rule worker
-- Terminal alerts
-- Prometheus metrics
-- YAML-based configuration
+## Tech Stack
 
-### Future
+- **Go** — Core application language, concurrency, event processing, rule engine, configuration handling, and HTTP metrics endpoint
+- **Prometheus** — Scrapes and stores LogRadar application metrics
+- **Docker** — Containerizes LogRadar and provides the runtime environment
 
-- Unit and integration testing
-- Multiple log sources
-- Additional detection rules
-- Grafana dashboards
-- Docker deployment
-- CI/CD with GitHub Actions
-- Webhook/Slack notifications
-- ML-based anomaly detection
-- Web dashboard
-- Configuration UI
+---
+
+## Project Structure
+
+```text
+## Project Structure
+
+```text
+LogRadar/
+├── cmd/
+│   └── logradar/
+│       └── main.go                  # Application entry point and component orchestration
+│
+├── internal/
+│   ├── alerting/
+│   │   └── printer.go               # Prints triggered alerts
+│   │
+│   ├── config/
+│   │   ├── config.go                # Loads application configuration
+│   │   └── config_test.go           # Configuration tests
+│   │
+│   ├── metrics/
+│   │   └── metrics.go               # Prometheus metrics and /metrics endpoint
+│   │
+│   ├── parser/
+│   │   ├── parser.go                # Converts JSON logs into LogEvent objects
+│   │   └── parser_test.go           # Parser tests
+│   │
+│   ├── rules/
+│   │   ├── brute_force.go            # Brute-force detection logic
+│   │   ├── detector_test.go          # Detection rule tests
+│   │   ├── rules.go                  # Rule and Alert definitions
+│   │   └── workers.go                # Concurrent rule worker
+│   │
+│   └── tailer/
+│       └── tailer.go                # Continuously reads new log entries
+│
+├── configs/
+│   └── configs.yml                  # Detection configuration
+│
+├── logs/
+│   ├── example_sam_log.txt          # Example log data
+│   └── sample.log                   # Sample application log
+│
+├── Dockerfile                       # LogRadar container definition
+├── docker-compose.yml               # LogRadar and Prometheus services
+├── prometheus.yml                   # Prometheus scrape configuration
+│
+├── data/                            # Prometheus local storage
+│   ├── chunks/
+│   ├── index/
+│   ├── wal/
+│   └── ...
+│
+├── commands.txt                     # Useful project commands
+├── structure_of_project.txt         # Project structure reference
+├── go.mod                           # Go module definition
+├── go.sum                           # Go dependency checksums
+├── LICENSE
+└── README.md
+```
+
+### Component Roles
+
+**`main.go`**  
+Acts as the application entry point. It initializes configuration, channels, processing components, detection rules, alerting, and the metrics server.
+
+**`internal/`**  
+Contains the core LogRadar application components.
+
+**`configs/`**  
+Stores configurable detection parameters separately from the Go source code.
+
+**`logs/`**  
+Contains the log files used as input for LogRadar.
+
+**`Dockerfile`**  
+Defines how the LogRadar Go application is packaged into a Docker image.
+
+**`docker-compose.yml`**  
+Defines the containerized services and their networking configuration.
+
+**`prometheus.yml`**  
+Defines how Prometheus discovers and scrapes LogRadar's `/metrics` endpoint.
+
+**`data/`**  
+Contains Prometheus's locally stored monitoring data, including its time-series database files and write-ahead log.
+
+**`tests`**  
+Testing is currently organized alongside the components inside `internal/` using Go's `_test.go` convention rather than a separate top-level test directory.
+```
+
+---
+
+## Configurations
+
+Detection behavior is configured through:
+
+```text
+configs/configs.yml
+```
+
+Example:
+
+```yaml
+brute_force:
+  threshold: 5
+  window: 30s
+```
+
+### Configuration fields
+
+| Field | Purpose |
+|---|---|
+| `threshold` | Number of failed attempts required to trigger detection |
+| `window` | Time period in which attempts are evaluated |
+
+Changing the configuration allows detection behavior to be adjusted without modifying the detection implementation.
+
+---
+
+## Prometheus Metrics
+
+LogRadar exposes its metrics through:
+
+```text
+http://localhost:9000/metrics
+```
+
+Port **9000** belongs to the LogRadar application and serves the `/metrics` endpoint.
+
+Prometheus runs on:
+
+```text
+http://localhost:9090
+```
+
+Port **9090** belongs to the Prometheus server and provides the Prometheus interface and query system.
+
+### Current Metrics
+
+```text
+logradar_events_processed_total
+logradar_alerts_triggered_total
+```
+
+The relationship between the two services is:
+
+```text
+LogRadar :9000
+     │
+     │ /metrics
+     ▼
+Prometheus :9090
+```
+
+Prometheus periodically scrapes the metrics exposed by LogRadar and makes the collected data available for querying.
+
+---
 
 ## Learning Focus
 
-LogRadar is primarily designed to demonstrate practical understanding of:
+LogRadar focuses on practical understanding of:
+
+### Go
 
 ```text
-Go
-├── Goroutines
-├── Channels
-├── Worker patterns
-├── Structs
-├── Interfaces
-├── Error handling
-└── Concurrency
-
-Backend / Systems
-├── Log ingestion
-├── Event processing
-├── Rule engines
-├── Configuration management
-└── Observability
-
-DevOps
-├── Prometheus, Grafana
-├── Docker (planned)
-└── CI/CD (planned)
+Goroutines
+Channels
+Worker patterns
+Structs
+Interfaces
+Error handling
+Concurrency
+File handling
+JSON parsing
+Configuration loading
+HTTP servers
 ```
+
+### Backend & Systems
+
+```text
+Continuous log ingestion
+Event-driven processing
+Rule-based detection
+Concurrent workers
+Configuration-driven applications
+Application observability
+```
+
+### Monitoring
+
+```text
+Prometheus metrics
+Metric counters
+HTTP /metrics endpoint
+Metrics scraping
+```
+
+### Containerization
+
+```text
+Docker
+Containerized Go applications
+Container networking
+Service-to-service communication
+```
+
+---
+
+## Future Scope
+
+Possible extensions to LogRadar include:
+
+- Additional security detection rules
+- Multiple log-file and log-source support
+- More detailed security metrics
+- Advanced alert delivery mechanisms
+- Webhook and notification integrations
+- Anomaly detection
+- Machine-learning-based detection
+- Web-based monitoring interface
+- More extensive integration and load testing
+- Expanded containerized deployment architecture
