@@ -1,0 +1,37 @@
+All required commands:
+
+
+To run LogRadar locally
+go run cmd/logradar/main.go
+
+
+To check log metrics
+curl http://localhost:9000/metrics
+
+
+To append log
+echo '{"timestamp":"2026-09-27T10:00:00Z","source_ip":"192.168.1.10","event_type":"login_failed","username":"admin","status":"failed"}' >> logs/sample.log
+
+
+To start container
+docker compose up
+
+
+To stop container
+docker compose down
+
+
+To run a particular test(eg: internal/config)
+go test -v ./internal/config/
+
+
+To run all tests
+go test -v ./...
+
+
+Prometheus UI
+http://localhost:9090
+
+
+To check log metrics
+http://localhost:9000/metrics

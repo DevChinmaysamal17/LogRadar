@@ -1,0 +1,7 @@
+.git
+.gitignore
+.github
+data/
+*.log
+.vscode/
+.DS_Store
