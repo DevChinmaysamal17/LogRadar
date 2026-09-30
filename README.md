@@ -27,7 +27,7 @@ A dedicated Go goroutine runs the log tailing process and reads new lines as the
 
 ---
 
-### Phase 2 — Event Parsing
+### Phase 2 - Event Parsing
 
 Raw log lines are received as JSON strings and converted into structured `LogEvent` objects.
 
@@ -55,7 +55,7 @@ LogEvent
 
 ---
 
-### Phase 3 — Rule Engine
+### Phase 3 - Rule Engine
 
 Parsed events are passed to the rule-processing system.
 
@@ -74,7 +74,7 @@ The rule system is separated from the parser so detection logic can be extended 
 
 ---
 
-### Phase 4 — Alerting
+### Phase 4 - Alerting
 
 When a detection rule is triggered, LogRadar creates an alert containing information about the detected activity.
 
@@ -100,7 +100,7 @@ This keeps detection processing separate from alert output.
 
 ---
 
-### Phase 5 — Prometheus Metrics
+### Phase 5 - Prometheus Metrics
 
 LogRadar exposes application metrics through an HTTP `/metrics` endpoint.
 
@@ -129,7 +129,7 @@ This provides visibility into the number of processed events and triggered detec
 
 ---
 
-### Phase 6 — Configuration
+### Phase 6 - Configuration
 
 Detection settings are externalized into a YAML configuration file instead of being hardcoded into the detection logic.
 
@@ -147,7 +147,7 @@ This allows detection behavior to be modified without changing the Go source cod
 
 ---
 
-### Phase 7 — Testing
+### Phase 7 - Testing
 
 The project includes tests for important application components such as parsing, configuration loading, and detection rules.
 
@@ -155,7 +155,7 @@ Testing focuses on verifying that individual components behave correctly and tha
 
 ---
 
-### Phase 8 — Docker
+### Phase 8 - Docker
 
 LogRadar is containerized using Docker.
 
